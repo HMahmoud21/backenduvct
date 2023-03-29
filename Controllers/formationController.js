@@ -169,6 +169,29 @@ deleteFormation:async(req, res) =>{
       res.status(500).json({msg: error.message});
   }
 },
+getFormationsByTitle :async (req, res) =>{
+  const title=req.body.title
+    try {
+      let response;
+      
+          response = await Formation.findOne({
+              attributes:['title','offre','categorie','createdAt'],
+              include:[{
+                model: Instructeur,
+                attributes:['name']
+            }],
+            where:
+            [
+              numero===numero
+            ]
+              
+          });
+      
+      res.status(200).json(response);
+  } catch (error) {
+      res.status(500).json({msg: error.message});
+  }
+},
 
 
 }
