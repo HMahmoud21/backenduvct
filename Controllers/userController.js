@@ -2,8 +2,11 @@ const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const path=require("path");
+const fs= require("fs");
 const nodemailer = require('nodemailer');
 const User = require("../models/User");
+
 
 const userController = {
 
@@ -33,14 +36,9 @@ register: async (req, res) => {
           bcrypt.hash(req.body.password, 10, (err, hash) => {
             userData.password = hash;
             User.create(userData).then(function (user) {
-                //res.status(200).send({message:"User created successfully"}) 
-                
-                //EmailSender({email})
-               // res.json({ msg: "Your message sent successfully" });
+               
                var transport = nodemailer.createTransport({
-                /*host: 'smtp.gmail.com',
-                 port: 465,
-                secure: true,*/
+                
                 service: 'Gmail',
                 auth: {
                 user: 'gytgutu@gmail.com',
@@ -82,34 +80,59 @@ register: async (req, res) => {
         res.send("error: " + err);
       });
   },
-login: (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.send({
-        error: "nom d'utilisateur ou bien mot de passe est manquante",
-      });
-    }
-    User.findOne({
-      where: {
-        email: req.body.email,
-      },
-    })
-      .then((user) => {
-        if (user) {
-          if (bcrypt.compareSync(req.body.password, user.password)) {
-            let token = jwt.sign(user.dataValues, process.env.SECRET_KEY, {
-              expiresIn: 1440,
-            });res.status(200).json({status:user.email+"logged successfully"})
-            //res.send(token);
-          }
-        } else {
-          res.status(400).json({ error: "User does not exist" });
+  
+login: async (req, res) => {
+  try {
+    const user = await User.findAll({
+        where:{
+            email: req.body.email
         }
-      })
-      .catch((err) => {
-        res.status(400).json({ error: err });
-      });
-  },
+    });
+    const match = await bcrypt.compare(req.body.password, user[0].password);
+    if(!match) return res.status(400).json({msg: "Wrong Password"});
+    const userId = user[0].id;
+    const name = user[0].name;
+    const email = user[0].email;
+    const accessToken = jwt.sign({userId, name, email}, process.env.ACCESS_TOKEN_SECRET,{
+        expiresIn: '20s'
+    });
+    const refreshToken = jwt.sign({userId, name, email}, process.env.REFRESH_TOKEN_SECRET,{
+        expiresIn: '1d'
+    });
+    await User.update({refresh_token: refreshToken},{
+        where:{
+            id: userId
+        }
+    });
+    res.cookie('refreshToken', refreshToken,{
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    });
+    res.json({ accessToken });
+} catch (error) {
+    res.status(404).json({msg:"Email tidak ditemukan"});
+}
+},
+     
+
+Logout : async(req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if(!refreshToken) return res.sendStatus(204);
+    const user = await User.findAll({
+        where:{
+            refresh_token: refreshToken
+        }
+    });
+    if(!user[0]) return res.sendStatus(204);
+    const userId = user[0].id;
+    await Users.update({refresh_token: null},{
+        where:{
+            id: userId
+        }
+    });
+    res.clearCookie('refreshToken');
+    return res.sendStatus(200);
+},
 
 getUser : async(req, res) =>{
     try {
@@ -133,6 +156,8 @@ deleteUser : async(req, res) =>{
     });
     if(!user) return res.status(404).json({msg: "User not found"});
     try {
+      const filepath = `./public/images/${product.image}`;
+        fs.unlinkSync(filepath);
         await User.destroy({
             where:{
                 id: user.id
@@ -218,7 +243,74 @@ Userinfo: async (req, res) =>{
   });
   if(!user) return res.status(404).json({msg: "Utilisateur non trouvé"});
   res.status(200).json(user);
-}
+},
+saveUser : (req, res)=>{
+  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
+  const name = req.body.name;
+  const file = req.files.file;
+  const fileSize = file.data.length;
+  const ext = path.extname(file.name);
+  const fileName = file.md5 + ext;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  const allowedType = ['.png','.jpg','.jpeg'];
+
+  if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+  if(fileSize > 5000000) return res.status(422).json({msg: "Image must be less than 5 MB"});
+
+  file.mv(`./public/images/${fileName}`, async(err)=>{
+      if(err) return res.status(500).json({msg: err.message});
+      try {
+          await User.create({name: name, image: fileName, url: url});
+          res.status(201).json({msg: "user  Created Successfuly"});
+      } catch (error) {
+          console.log(error.message);
+      }
+  })
+
+},
+updateImage : async(req, res)=>{
+  const user = await User.findOne({
+      where:{
+          email:req.body.email
+      }
+  });
+  if(!user) return res.status(404).json({msg: "No Data Found"});
+  
+  let fileName = "";
+  if(req.files === null){
+      fileName =user.image;
+  }else{
+      const file = req.files.file;
+      const fileSize = file.data.length;
+      const ext = path.extname(file.name);
+      fileName = file.md5 + ext;
+      const allowedType = ['.png','.jpg','.jpeg'];
+
+      if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+      if(fileSize > 5000000) return res.status(422).json({msg: "Image must be less than 5 MB"});
+
+      const filepath = `./public/images/${product.image}`;
+      fs.unlinkSync(filepath);
+
+      file.mv(`./public/images/${fileName}`, (err)=>{
+          if(err) return res.status(500).json({msg: err.message});
+      });
+  }
+  const name = req.body.title;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  
+  try {
+      await User.update({name: name, image: fileName, url: url},{
+          where:{
+            email:req.body.email
+          }
+      });
+      res.status(200).json({msg: "user Updated Successfuly"});
+  } catch (error) {
+      console.log(error.message);
+  }
+},
+
 }
 
 
