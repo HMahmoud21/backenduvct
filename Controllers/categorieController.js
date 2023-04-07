@@ -7,7 +7,7 @@ const CategorieController={
 CreateCategorie:async(req,res)=>{
     const today = new Date();
     
-    const { title, description,image,ref,  formationId} = req.body; 
+    const { title, description,image,ref, formationId,formationUUid} = req.body; 
   
         try {
        
@@ -23,7 +23,7 @@ CreateCategorie:async(req,res)=>{
             image: image,
             ref: ref,
             createdAt:today,
-            formationId:formationId
+            formationId:formationUUid
           });
       
           res.status(201).json({ msg: "categorie créé avec succès", categorie: newCategorie });

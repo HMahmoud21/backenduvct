@@ -3,7 +3,8 @@ var cors = require('cors')
 var bodyParser = require('body-parser')
 const mysql=require("mysql");
 const session =require("express-session");
-const multer =require("multer")
+const FileUpload = require("express-fileupload");
+
 var flash = require('express-flash');
 //const SequelizeStore=require("connect-session-sequelize");
 //const db= require ("./config/db");
@@ -11,11 +12,6 @@ var port = process.env.PORT || 5000
 var app = express()
 const dotenv =require("dotenv").config();
 
-//const sessionStore = SequelizeStore(session.Store);
-
-//const store = new sessionStore({
-   // db: db
-//});
 
 
 app.use(session({ 
@@ -29,7 +25,8 @@ app.use(session({
 // enregistrer des message de la session 
 
 app.use(flash());
-
+app.use(FileUpload());
+app.use(express.static("public"));
 
 app.use(bodyParser.json())
 app.use(cors({
@@ -73,7 +70,11 @@ var instructeur=require('./routes/instructeur')
 var apprenant=require('./routes/Apprenant')
 var formation=require('./routes/Formation');
 var evenement=require('./routes/Evenement')
-
+var categorie=require('./routes/Categorie')
+var upload=require("./routes/uplod")
+var souscategorie=require("./routes/souscategorie")
+var section=require("./routes/section");
+var Session=require("./routes/Session")
 
 app.use('/users', router);
 app.use('/formateurcandidat',formateurcandidat);
@@ -81,11 +82,17 @@ app.use('/instructeur',instructeur);
 app.use('/apprenant',apprenant);
 app.use('/formation',formation);
 app.use('/event',evenement);
+app.use('/cat',categorie);
+app.use('/upload',upload);
+app.use("/souscategorie",souscategorie)
+app.use("/section",section);
+app.use("/session",Session)
 
 
 
 
 
+app.use("/uploads",express.static("./uploads"))
 
 app.listen(port, function() {
   console.log('Server is running on port: ' + port)

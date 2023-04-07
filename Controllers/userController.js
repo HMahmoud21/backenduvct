@@ -8,6 +8,8 @@ const nodemailer = require('nodemailer');
 const User = require("../models/User");
 
 
+
+
 const userController = {
 
 register: async (req, res) => {
@@ -244,30 +246,32 @@ Userinfo: async (req, res) =>{
   if(!user) return res.status(404).json({msg: "Utilisateur non trouvé"});
   res.status(200).json(user);
 },
-saveUser : (req, res)=>{
-  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
+saveUser: (req, res) => {
+  if (req.files === null) return res.status(400).json({msg: "No File Uploaded"});
   const name = req.body.name;
   const file = req.files.file;
-  const fileSize = file.data.length;
+  //const fileSize = file.size;
   const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
   const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
-  const allowedType = ['.png','.jpg','.jpeg'];
+  const allowedType = ['.png', '.jpg', '.jpeg'];
 
-  if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
-  if(fileSize > 5000000) return res.status(422).json({msg: "Image must be less than 5 MB"});
+  if (!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+  //if (fileSize > 5000000) return res.status(422).json({msg: "Image must be less than 5 MB"});
 
-  file.mv(`./public/images/${fileName}`, async(err)=>{
-      if(err) return res.status(500).json({msg: err.message});
-      try {
-          await User.create({name: name, image: fileName, url: url});
-          res.status(201).json({msg: "user  Created Successfuly"});
-      } catch (error) {
-          console.log(error.message);
-      }
+  file.mv(`./public/images/${fileName}`, async (err) => {
+    if (err) return res.status(500).json({msg: err.message});
+    try {
+      await User.create({email: req.body.email, image: fileName, url: url});
+      res.status(201).json({msg: "user Created Successfully"});
+    } catch (error) {
+      console.log(error.message);
+    }
   })
-
 },
+
+
+
 updateImage : async(req, res)=>{
   const user = await User.findOne({
       where:{
@@ -281,7 +285,7 @@ updateImage : async(req, res)=>{
       fileName =user.image;
   }else{
       const file = req.files.file;
-      const fileSize = file.data.length;
+      //const fileSize = file.data.length;
       const ext = path.extname(file.name);
       fileName = file.md5 + ext;
       const allowedType = ['.png','.jpg','.jpeg'];
@@ -289,18 +293,18 @@ updateImage : async(req, res)=>{
       if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
       if(fileSize > 5000000) return res.status(422).json({msg: "Image must be less than 5 MB"});
 
-      const filepath = `./public/images/${product.image}`;
+      const filepath = `./public/images/${user.image}`;
       fs.unlinkSync(filepath);
 
       file.mv(`./public/images/${fileName}`, (err)=>{
           if(err) return res.status(500).json({msg: err.message});
       });
   }
-  const name = req.body.title;
+  
   const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
   
   try {
-      await User.update({name: name, image: fileName, url: url},{
+      await User.update({ image: fileName, url: url},{
           where:{
             email:req.body.email
           }

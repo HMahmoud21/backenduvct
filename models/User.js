@@ -16,10 +16,7 @@ module.exports = db.sequelize.define(
     name: {
       type: Sequelize.STRING,
       allowNull:false,
-      validate:{
-        notEmpty:true ,
-        len:[3,50]
-      }
+     
      
     
     
@@ -36,20 +33,16 @@ module.exports = db.sequelize.define(
     
     email: {
       type: Sequelize.STRING,
-      allowNull:false,
-      isEmail:true,validate:{
-        notEmpty:true,
-        isEmail:true
-      }
+      
     },
     password: {
       type: Sequelize.STRING,
       allowNull:false,
       
-      validate:{
-        notEmpty:true
-      }
-
+      
+    },
+    image: {
+      type: Sequelize.STRING,
     },
    
     created: {
@@ -72,6 +65,10 @@ module.exports = db.sequelize.define(
     type: Sequelize.STRING,
     allowNull:true
   },
+
+  refresh_token:{
+        type: DataTypes.TEXT
+    }
 
     
   },

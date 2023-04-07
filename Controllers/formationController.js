@@ -126,6 +126,46 @@ depublier:async(req,res)=>{
 
 
 },
+archiver:async(req,res)=>{
+  try {
+    const formation = await Formation.findOne({
+      where: {
+        numero: req.body.numero 
+       
+        
+      }
+    });
+    if (!formation) return res.status(404).json({msg: "La formation n'existe pas."});
+
+    const { numero } = req.body;
+
+    // Vérification du rôle de l'utilisateur (ici admin)
+    //if (req.role !== "admin") {
+      //return res.status(403).json({ msg: "Vous n'êtes pas autorisé à publier cette formation." });
+    //}
+
+    // Mise à jour du statut de la formation de 0 à 1
+    await Formation.update(
+      { 
+        archiver: 1
+      },
+      {
+        where: {
+          numero: numero,
+       
+        }
+      }
+    );
+
+    res.status(201).json({ msg: "La formation a été archiver avec succès." });
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+
+
+
+
+},
 deleteFormation:async(req, res) =>{
   try {
       const product = await Formation.findOne({
@@ -145,7 +185,7 @@ deleteFormation:async(req, res) =>{
         } catch (error) {
             res.status(500).json({msg: error.message});
         }
-      },
+},
  getFormationsBynum :async (req, res) =>{
   const numero=req.body.numero
     try {

@@ -69,6 +69,12 @@ const Formation = db.sequelize.define(
         defaultValue:null
     },
 
+    archiver:{
+        type: DataTypes.INTEGER,
+        defaultValue:0
+
+    }
+
 
     
   },
