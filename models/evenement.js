@@ -1,7 +1,6 @@
 const {Sequelize, DataTypes} = require('sequelize')
 const db = require('../config/db.js');
-const Instructeur = require('./Instructeur.js');
-const Admin =require('./Admin.js');
+const User=require('../models/UserModel.js')
 
 const Evenement = db.sequelize.define(
   'evenement',
@@ -83,18 +82,12 @@ surPlace:{
         type: DataTypes.BOOLEAN, 
         defaultValue:0    
     },
-
-
-    instructeurId:{
-        type: DataTypes.INTEGER,
-      
-
-     
-       
+postedBy: {
+        type: Sequelize.INTEGER,
     },
-adminId:{
-        type: DataTypes.INTEGER,  
-        
+    status:{
+        type: Sequelize.INTEGER,
+        defaultValue:"archiver",// status : publier , depublier ,archiver 
     },
 
 
@@ -104,11 +97,8 @@ adminId:{
     freezeTableName: true
 });
 
-Instructeur.hasMany(Evenement);
-Evenement.belongsTo(Instructeur, {foreignKey: 'InstructeurId'});
-
-Admin.hasMany(Evenement);
-Evenement.belongsTo(Instructeur, {foreignKey: 'adminId'});
+User.hasMany(   Evenement);
+Evenement.belongsTo(User, {foreignKey: 'postedBy'});
 
 module.exports =Evenement
 

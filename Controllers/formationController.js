@@ -1,28 +1,32 @@
-const Instructeur = require("../models/Instructeur");
-const Formation=require("../models/formation");
-const {Op} =require("sequelize");
+const Formation= require("../models/formation");
+const User = require("../models/UserModel");
+ 
 
 
-const formationController = {
-  createFormation: async (req, res) => {
-    const { title, categorie, status, price, numero,offre,instructeurUUid} = req.body; 
-    try {
-      // Vérifiez si une formation avec le même numéro existe déjà dans la base de données.
-      const formation = await Formation.findOne({ where: { numero: numero } });
-      if (formation) {
-        return res.status(409).json({ msg: "La formation existe déjà" }); // Utilisation du code d'état 409 Conflict pour indiquer que la demande ne peut être traitée en raison d'un conflit avec les ressources existantes.
-      }
+const FormationController={
+CreateFormation:async(req,res )=>{
 
-      // Créer une nouvelle formation avec l'ID de l'instructeur associé.
-      const newFormation = await Formation.create({
+    const { title, subTitle,categorie, status, price, ref,offre,level,description,objectif,prerequis} = req.body;
+     
+    try{
+        const formation = await Formation.findOne({ where: { ref:ref } });
+        if (formation) {
+          return res.status(409).json({ msg: "La formation existe déjà" }); 
+        }
+    
+    const newFormation = await Formation.create({
         title: title,
+        subTitle:subTitle,
+        level:level,
+        description:description,
+        objectif:objectif,
         categorie: categorie,
         status: status,
         price: price,
-        numero: numero,
+        prerequis:prerequis,
+       ref:ref,
         offre:offre,
-        instructeurUUid: req.body.instructeurUUid,//req.params
-       //instructeurId: req.instructeurId,
+        postedBy: req.params.id,
       });
 
       res.status(201).json({ msg: "Formation créée avec succès", formation: newFormation });
@@ -30,15 +34,18 @@ const formationController = {
       console.error(error);
       res.status(500).json({ msg: "Une erreur est survenue lors de la création de la formation" });
     }
-  },
-  getFormations :async (req, res) =>{
+
+
+
+},
+getFormations :async (req, res) =>{
     try {
       let response;
       
           response = await Formation.findAll({
               attributes:['title','offre','categorie','createdAt'],
               include:[{
-                model: Instructeur,
+                model: User,
                 attributes:['name']
             }]
               
@@ -49,190 +56,179 @@ const formationController = {
       res.status(500).json({msg: error.message});
   }
 },
-publier:async(req,res)=>{
-  try {
-    const product = await Formation.findOne({
-      where: {
-        numero: req.body.numero
-      }
-    });
-    if (!product) return res.status(404).json({msg: "La formation n'existe pas."});
-
-    const { numero } = req.body;
-
-    // Vérification du rôle de l'utilisateur (ici admin)
-    //if (req.role !== "admin") {
-      //return res.status(403).json({ msg: "Vous n'êtes pas autorisé à publier cette formation." });
-    //}
-
-    // Mise à jour du statut de la formation de 0 à 1
-    await Formation.update(
-      { 
-        status: 1
-      },
-      {
-        where: {
-          numero: numero
-        }
-      }
-    );
-
-    res.status(201).json({ msg: "La formation a été publiée avec succès." });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-
-
-
-
-},
-depublier:async(req,res)=>{
-  try {
-    const formation = await Formation.findOne({
-      where: {
-        numero: req.body.numero 
-       
-        
-      }
-    });
-    if (!formation) return res.status(404).json({msg: "La formation n'existe pas."});
-
-    const { numero } = req.body;
-
-    // Vérification du rôle de l'utilisateur (ici admin)
-    //if (req.role !== "admin") {
-      //return res.status(403).json({ msg: "Vous n'êtes pas autorisé à publier cette formation." });
-    //}
-
-    // Mise à jour du statut de la formation de 0 à 1
-    await Formation.update(
-      { 
-        status: 0
-      },
-      {
-        where: {
-          numero: numero,
-       
-        }
-      }
-    );
-
-    res.status(201).json({ msg: "La formation a été dépubliée avec succès." });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-
-
-
-
-},
-archiver:async(req,res)=>{
-  try {
-    const formation = await Formation.findOne({
-      where: {
-        numero: req.body.numero 
-       
-        
-      }
-    });
-    if (!formation) return res.status(404).json({msg: "La formation n'existe pas."});
-
-    const { numero } = req.body;
-
-    // Vérification du rôle de l'utilisateur (ici admin)
-    //if (req.role !== "admin") {
-      //return res.status(403).json({ msg: "Vous n'êtes pas autorisé à publier cette formation." });
-    //}
-
-    // Mise à jour du statut de la formation de 0 à 1
-    await Formation.update(
-      { 
-        archiver: 1
-      },
-      {
-        where: {
-          numero: numero,
-       
-        }
-      }
-    );
-
-    res.status(201).json({ msg: "La formation a été archiver avec succès." });
-  } catch (error) {
-    res.status(500).json({ msg: error.message });
-  }
-
-
-
-
-},
-deleteFormation:async(req, res) =>{
-  try {
-      const product = await Formation.findOne({
-          where:{
-              numero: req.body.numero
-          }
-      });
-      if(!product) return res.status(404).json({msg: "formation n'existe pas "});
-       const numero=req.body.numero
-     
-          await Formation.destroy({
-              where:{
-               numero:numero
-              }
-          });
-          res.status(200).json({msg: "formation supprimé "});
-        } catch (error) {
-            res.status(500).json({msg: error.message});
-        }
-},
- getFormationsBynum :async (req, res) =>{
-  const numero=req.body.numero
-    try {
-      let response;
-      
-          response = await Formation.findAll({
-              attributes:['title','offre','categorie','createdAt'],
-              include:[{
-                model: Instructeur,
-                attributes:['name']
-            }],
-            where:
-            [
-              numero===numero
-            ]
-              
-          });
-      
-      res.status(200).json(response);
-  } catch (error) {
-      res.status(500).json({msg: error.message});
-  }
-},
 getFormationsByTitle :async (req, res) =>{
-  const title=req.body.title
+   
+    
+      try {
+        let response;
+        
+            response = await Formation.findOne({
+                attributes:['title','offre','categorie','createdAt'],
+                include:[{
+                  model: User,
+                  attributes:['name']
+              }],
+              where:
+              {
+                title:req.body.title
+              }
+                
+            });
+        
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({msg: error.message});
+    }
+}, 
+publier:async(req,res)=>{
     try {
-      let response;
-      
-          response = await Formation.findOne({
-              attributes:['title','offre','categorie','createdAt'],
-              include:[{
-                model: Instructeur,
-                attributes:['name']
-            }],
-            where:
-            [
-              numero===numero
-            ]
-              
-          });
-      
-      res.status(200).json(response);
-  } catch (error) {
-      res.status(500).json({msg: error.message});
-  }
+      const uuid = req.params.uuid;
+      if (!uuid) return res.status(400).json({msg: "UUID manquant."});
+  
+      const product = await Formation.findOne({
+        where: {
+          UUid: uuid
+        }
+      });
+      if (!product) return res.status(404).json({msg: "La formation n'existe pas."});
+  
+      await Formation.update(
+        { 
+          status: "pulier"
+        },
+        {
+          where: {
+            UUid: uuid
+          }
+        }
+      );
+  
+      res.status(201).json({ msg: "La formation a été publiée avec succès." });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
+  
+depublier:async(req,res)=>{
+    try {
+        const uuid = req.params.uuid;
+        if (!uuid) return res.status(400).json({msg: "UUID manquant."});
+    
+        const product = await Formation.findOne({
+          where: {
+            UUid: uuid
+          }
+        });
+        if (!product) return res.status(404).json({msg: "La formation n'existe pas."});
+    
+        await Formation.update(
+          { 
+            status: "depulier"
+          },
+          {
+            where: {
+              UUid: uuid
+            }
+          }
+        );
+    
+        res.status(201).json({ msg: "La formation a été publiée avec succès." });
+      } catch (error) {
+        res.status(500).json({ msg: error.message });
+      }
+    },
+  
+  
+
+archiver:async(req,res)=>{
+    try {
+        const uuid = req.params.uuid;
+        if (!uuid) return res.status(400).json({msg: "UUID manquant."});
+    
+        const product = await Formation.findOne({
+          where: {
+            UUid: uuid
+          }
+        });
+        if (!product) return res.status(404).json({msg: "La formation n'existe pas."});
+    
+        await Formation.update(
+          { 
+            status: "archiver"
+          },
+          {
+            where: {
+              UUid: uuid
+            }
+          }
+        );
+    
+        res.status(201).json({ msg: "La formation a été publiée avec succès." });
+      } catch (error) {
+        res.status(500).json({ msg: error.message });
+      }
+    },
+deleteFormation:async(req, res) =>{
+    try {
+        const product = await Formation.findOne({
+            where:{
+                ref:req.body.ref
+            }
+        });
+        if(!product) return res.status(404).json({msg: "formation n'existe pas "});
+         const ref=req.body.ref
+       
+            await Formation.destroy({
+                where:{
+                ref:ref
+                }
+            });
+            res.status(200).json({msg: "formation supprimé "});
+          } catch (error) {
+              res.status(500).json({msg: error.message});
+          }
 },
+updateFormation:async(req,res)=>{
+  try {
+    const uuid = req.params.uuid;
+    const evenement = await Formation.findOne({
+        where:{
+            UUiid: uuid
+        }
+    });
+    if(!evenement) return res.status(404).json({msg: "n'existe pas "});
+    const { title, subTitle,categorie, status, price, ref,offre,level,description,objectif,prerequis} = req.body;
+     
+        await Formation.update({
+          title, subTitle,categorie, status, price, ref,offre,level,description,objectif,prerequis
+         },{
+            where:{
+               UUid:uuid
+            }
+        });
+    
+    res.status(200).json({msg: "mise à jour fait avec succes "});
+} catch (error) {
+    res.status(500).json({msg: error.message});
+}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 }
-module.exports=formationController
+module.exports= FormationController

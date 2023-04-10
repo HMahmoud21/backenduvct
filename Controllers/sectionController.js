@@ -4,7 +4,7 @@ const Formation=require("../models/formation")
 const SectionController={
 addsection:async(req,res)=>{ 
     const today = new Date(); 
-    const {title,objectif,ref,formationUUid} = req.body
+    const {title,objectif,ref} = req.body
     try {
        
         const section = await Section.findOne({ where: { ref: ref } });
@@ -16,8 +16,9 @@ addsection:async(req,res)=>{
             objectif:objectif,
             ref: ref,
             createdAt:today,
-            formationUUid:formationUUid
-            //formationId:req.formationId
+            formationId:req.params.id
+            
+        
           });
 
         res.status(201).json({ msg: "section  créé avec succès",section: newSection });
@@ -46,44 +47,53 @@ getSection:async(req,res)=>{
     }
 
 } , 
-getsectionByid:async(req,res)=>{
-  try {
-    const section = await Section.findOne({
-        where:{
-            uuid: req.params.id
-        }
-    });
-    if(!section) return res.status(404).json({msg: "section n'existe pas "});
-    let response;
+getsectionByid: async (req, res) => {
+    try {
+        const uuid = req.params.uuid;
+      console.log(uuid)
     
-        response = await Section.findOne({
-            attributes:['title'],
-            where:{
-                id: section.id
-            },
-            include:[{
-                model: Formation,
-                attributes:['title']
-            }]
-        }); res.status(200).json(response);
-       }catch (error) {
-          res.status(500).json({msg: error.message});
+  
+      const section = await Section.findOne({
+        where: { UUid: uuid }
+      });
+  
+      if (!section) {
+        return res.status(404).json({ msg: "Section n'existe pas" });
       }
-
-} ,
+  
+      const response = await Section.findOne({
+        attributes: ["title"],
+        where: { UUid: uuid},
+        include: [
+          {
+            model: Formation,
+            attributes: ["title"]
+          }
+        ]
+      });
+  
+      res.status(200).json(response);
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  },
 updateSection:async(req,res)=>{
   try {
-    const section = await Section.findOne({
-        where:{
-            uuid: req.params.id
-        }
-    });
-    if(!section) return res.status(404).json({msg: "section n'existe pas "});
+    const uuid = req.params.uuid;
+    console.log(uuid)
+
+   const section = await Section.findOne({
+        where: { UUid: uuid }
+      });
+  
+      if (!section) {
+        return res.status(404).json({ msg: "Section n'existe pas" });
+      }
     const {title,objectif,ref} = req.body
    
-        await Product.update({title,objectif,ref} ,{
+        await Section.update({title,objectif,ref} ,{
             where:{
-                id: section.id
+                 UUid: uuid
             }
         });
         res.status(200).json({msg: "section updated successfuly"});
@@ -94,17 +104,21 @@ updateSection:async(req,res)=>{
 },
 deleteSection:async(req,res)=>{
   try {
-    const section = await Section.findOne({
-        where:{
-            uuid: req.params.id
-        }
-    });
-    if(!section) return res.status(404).json({msg: "n'existe pas "});
-    const {title,description} = req.body;
+    const uuid = req.params.uuid;
+    console.log(uuid)
+
+   const section = await Section.findOne({
+        where: { UUid: uuid }
+      });
+  
+      if (!section) {
+        return res.status(404).json({ msg: "Section n'existe pas" });
+      }
+
     
         await Section.destroy({
             where:{
-                id: section.id
+                UUid: uuid 
             }
         });
         res.status(200).json({msg: "section deleted successfuly"});

@@ -23,7 +23,7 @@ CreateCategorie:async(req,res)=>{
             image: image,
             ref: ref,
             createdAt:today,
-            formationId:formationUUid
+            formationId:req.params.id
           });
       
           res.status(201).json({ msg: "categorie créé avec succès", categorie: newCategorie });

@@ -1,6 +1,6 @@
 const {Sequelize, DataTypes} = require('sequelize')
 const db = require('../config/db.js');
-const Instructeur = require('./Instructeur.js');
+const User=require('../models/UserModel.js')
 
 const Formation = db.sequelize.define(
   'formations',
@@ -25,21 +25,47 @@ const Formation = db.sequelize.define(
     
     
     },
+    subTitle: {
+        type: DataTypes.STRING,
+      },
+    description: {
+        type: DataTypes.TEXT,
+      },
+    level: {
+        type: DataTypes.STRING,
+    },
+    videopromo: {
+        type: DataTypes.STRING,
+      },
+    objectif: {
+        type: DataTypes.TEXT,
+      },
+    prerequis: {
+        type: DataTypes.STRING,
+      },
+    intendedFor: {
+        type: DataTypes.STRING,
+      },
+    free: {
+       
+        type: DataTypes.INTEGER,
+        defaultValue:0
+      },
     categorie:{
         type: DataTypes.STRING,
         allowNull: false,
        
     },
     price:{
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
         validate:{
             notEmpty: true
         }
     },
-    
-    numero:{
-        type: DataTypes.INTEGER,
+ 
+    ref:{
+        type: DataTypes.STRING,
       
     },
     offre:{
@@ -50,40 +76,28 @@ const Formation = db.sequelize.define(
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       },
-      updatedAt:{
+    updatedAt:{
           type: Sequelize.DATE,
           defaultValue: Sequelize.NOW
   
       },
-      status:{
+    status:{
           type: Sequelize.INTEGER,
-          defaultValue:0,
+          defaultValue:"archiver",// status : publier , depublier ,archiver 
       },
-      instructeurId:{
-        type: DataTypes.INTEGER,
-     
-       
-    },
-    instructeurUUid:{
-        type: DataTypes.INTEGER,
-        defaultValue:null
-    },
-
-    archiver:{
-        type: DataTypes.INTEGER,
-        defaultValue:0
-
-    }
-
-
+    
+    postedBy: {
+        type: Sequelize.INTEGER,
+        required:true,
+      },
     
   },
   {
     freezeTableName: true
 });
 
-  Instructeur.hasMany(Formation);
-Formation.belongsTo(Instructeur, {foreignKey: 'instructeurId'});
+ User.hasMany(Formation);
+Formation.belongsTo(User, {foreignKey: 'postedBy'});
 
 module.exports =Formation
 

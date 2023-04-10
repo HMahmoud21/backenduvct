@@ -2,7 +2,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 const db = require('../config/db');
 const Section=require("./section")
 
-const Session =db.sequelize.define('section', {
+const Session =db.sequelize.define('session', {
  UUid: {
       type: Sequelize.UUID,
       primaryKey: true,
@@ -16,9 +16,7 @@ const Session =db.sequelize.define('section', {
 title: {
         type: Sequelize.STRING,
 },
-description: {
-    type: Sequelize.STRING,
-},
+
 article: {
     type: Sequelize.STRING,
 },

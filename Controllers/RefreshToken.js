@@ -1,4 +1,4 @@
-const Users=require("../models/User")
+const Users=require("../models/UserModel")
 const jwt =require("jsonwebtoken")
 
 const  RefreshToken={

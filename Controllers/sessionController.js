@@ -4,22 +4,22 @@ const Section=require("../models/section")
 const SessionController={
 addSession:async(req,res)=>{
      
-            const {title,description,article,file,video,ref,sectionId}= req.body
+            const {title,article,file,video,ref,sectionId}= req.body
             try {
                
                 const session = await Session.findOne({ where: { ref: ref } });
                 if (session) {
                   return res.status(409).json({ msg: " existe déjà" }); 
                 }
-                const newSession= await Section.create({
+                const newSession= await Session.create({
                     title: title,
-                    description:description,
+                  
                     article:article,
                     file:file,
                     ref: ref,
                     video:video,
-                    createdAt:today,
-                    sectionId:req.sectionId
+                 
+                    sectionId:sectionId
                   });
         
                 res.status(201).json({ msg: "session créé avec succès",session: newSession });

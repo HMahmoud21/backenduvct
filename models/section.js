@@ -22,18 +22,18 @@ const Section =db.sequelize.define('sections', {
         type: Sequelize.STRING,
 
     },
-    
-   formationUUid:{
-        type: DataTypes.INTEGER,  
-    },
+
     createdAt: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
       },
-      updatedAt:{
+    updatedAt:{
           type: Sequelize.DATE,
           defaultValue: Sequelize.NOW
   
+      },
+    formationId:{
+        type: DataTypes.INTEGER, 
       },
 
 }, {

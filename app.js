@@ -64,29 +64,29 @@ app.options("http://localhost:3000", cors())
 
 //requte f postman
 
-var router = require('./routes/Users')
-var formateurcandidat=require('./routes/Formateur')
-var instructeur=require('./routes/instructeur')
-var apprenant=require('./routes/Apprenant')
-var formation=require('./routes/Formation');
+var router = require('./routes/UserRoute')
+//var formateurcandidat=require('./routes/Formateur')
+//var instructeur=require('./routes/instructeur')
+//var apprenant=require('./routes/Apprenant')
+var formation=require('./routes/FormationRoute');
 var evenement=require('./routes/Evenement')
-var categorie=require('./routes/Categorie')
+//var categorie=require('./routes/Categorie')
 var upload=require("./routes/uplod")
-var souscategorie=require("./routes/souscategorie")
+//var souscategorie=require("./routes/souscategorie")
 var section=require("./routes/section");
-var Session=require("./routes/Session")
+var Session=require("./routes/sessionRoute")
 
 app.use('/users', router);
-app.use('/formateurcandidat',formateurcandidat);
-app.use('/instructeur',instructeur);
-app.use('/apprenant',apprenant);
+//app.use('/formateurcandidat',formateurcandidat);
+//app.use('/instructeur',instructeur);
+//app.use('/apprenant',apprenant);
 app.use('/formation',formation);
 app.use('/event',evenement);
-app.use('/cat',categorie);
+//app.use('/cat',categorie);
 app.use('/upload',upload);
-app.use("/souscategorie",souscategorie)
+//app.use("/souscategorie",souscategorie)
 app.use("/section",section);
-app.use("/session",Session)
+app.use("/sessions",Session)
 
 
 
