@@ -5,7 +5,9 @@ const router = express.Router();
 
 router.post('/addFormation/:id',FormationController.CreateFormation);
 router.get('/gatallformation',FormationController.getFormations);
-router.get("/getformationByTitle",FormationController.getFormationsByTitle);
+router.get('/getformationbyid/:uuid',FormationController.getFormationsById);
+router.get("/getformationByTitle/:title",FormationController.getFormationsByTitle);
+router.get("/getFormationarchiver",FormationController.getFormationarchive);
 router.patch("/publier/:uuid",FormationController.publier);
 router.patch("/depulier/:uuid",FormationController.depublier);
 router.patch("/archiver/:uuid",FormationController.archiver)

@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User= require("../models/UserModel");
 const nodemailer = require('nodemailer');
+const path = require("path");
+const fs=require("fs");
 
 const UserCtrl={
 register: async (req, res) => {
@@ -112,7 +114,7 @@ login: async (req, res) => {
           //const userId = user.dataValues.uuid;console.log(userId)
           const name = user.name;console.log(name)
           const email = user.email;console.log(email)
-          const accessToken = jwt.sign({ name, email}, process.env.ACCESS_TOKEN_SECRET,{
+          const accessToken = jwt.sign({ name, email,role }, process.env.ACCESS_TOKEN_SECRET,{
               expiresIn: '20s'
           });
           
@@ -139,12 +141,13 @@ login: async (req, res) => {
           res.json({message:"User does not exist"});
       }
     },
-getUser : async(req, res) =>{
+getUserBId : async(req, res) =>{
         try {
+           const uuid = req.params.uuid;
             const response = await User.findAll({
                 attributes:['name','email','role','uuid'],
                 where: {
-                    email: req.body.email
+                    UUid:uuid
                 }
             });
             res.status(200).json(response);
@@ -153,6 +156,7 @@ getUser : async(req, res) =>{
         }
     },
 devenirInstructeur:async(req,res)=>{
+  
     const today = new Date();
     const userData = {
       name: req.body.name,
@@ -326,10 +330,11 @@ debloquerInstructeur:async(req,res)=>{
   }
    }, 
 deleteformateur : async(req, res) =>{
+  const uuid=req.params.uuid
  
     const formateur = await User.findOne({
     where: {
-        email:req.body.email
+      uuid:uuid
     }
 });
 if(!formateur) return res.status(404).json({msg: "formateur n'existe pas "});
@@ -337,7 +342,8 @@ if(!formateur) return res.status(404).json({msg: "formateur n'existe pas "});
 try {
     await User.destroy({
         where:{
-          email:req.body.email
+          uuid:uuid
+       
         }
     });
     res.status(200).json({msg: "Formateur Deleted"});
@@ -613,11 +619,11 @@ resetpass:async(req,res)=>{
     }
 },
 getUserbyId: async (req, res) =>{
-
+  const uuid = req.params.uuid;
   const user = await User.findOne({
       attributes:['uuid','name','email','role'],
       where: {
-          uuid: req.params.uuid
+        UUid: uuid
       }
   });
   if(!user) return res.status(404).json({msg: "Utilisateur non trouvé"});
@@ -674,39 +680,183 @@ try {
     res.status(400).json({msg: error.message});
 }
 
+},
+Logout :async(req, res) => {
+ 
+  const uuid = req.params.uuid;
+  const user = await User.findAll({
+      where:{
+        UUid: uuid
+      }
+  });
+  if(!user) return res.sendStatus(204);
+ 
+  await User.update({refresh_token: null},{
+      where:{
+        UUid: uuid
+      }
+  });
+  res.clearCookie('refreshToken');
+  
+  return res.sendStatus(200);
+}, 
+
+updateimage:async(req,res)=>{
+  const uuid=req.params.uuid
+ 
+  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
+  const name = req.body.title;
+  const file = req.files.file;
+  const ext = path.extname(file.name);
+  const fileName = file.md5 + ext;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  const allowedType = ['.png','.jpg','.jpeg'];
+
+  if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+
+
+  file.mv(`./public/images/${fileName}`, async(err)=>{
+      if(err) return res.status(500).json({msg: err.message});
+      try {
+            await User.update({
+              name: name, image: fileName, url: url
+              
+          },{
+              where:{
+                UUid: uuid
+              }
+          });
+        
+          res.status(201).json({msg: "image bien ajouté "});
+      } catch (error) {
+          console.log(error.message);
+      }
+  })
+},
+ajouter:async(req,res)=>{
+const today = new Date();
+ 
+  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
+  const name1= req.body.name;
+  const file = req.files.file;
+  const email= req.body.email;
+  const tel= req.body.tel;
+
+  const message=req.body.message;
+  const speciality=req.body.speciality;
+  const created= today;
+  const role="instruceur";
+  const status="bloqué";
+  const etat="en attent";
+  const ext = path.extname(file.name).toLowerCase;
+  const fileName = file.md5 + ext;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  const allowedType = ['.pdf'];
+
+  if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+
+
+  file.mv(`./public/images/${fileName}`, async(err)=>{
+      if(err) return res.status(500).json({msg: err.message});
+      try {
+            await User.create({
+              name:name1,
+              cv: fileName,
+              url: url,
+              email:email,
+              tel:tel,
+              message:message,
+              speciality:speciality,
+              role:role,
+              status:status, 
+          },{
+              where:{
+                UUid: uuid
+              }
+          });
+          res.status(201).json({msg: " "});
+      } catch (error) {
+          console.log(error.message);
+      }
+  })
+},
+ajouter202: async(req, res) => {
+  const today = new Date();
+  //const uuid=req.params.uuid
+
+  if (req.files === null) {
+    return res.status(400).json({ msg: "No File Uploaded" });
+  }
+  
+  const name = req.body.title
+  const file = req.files.file;
+  const email = req.body.email;
+  const tel = req.body.tel;
+  const message = req.body.message;
+  const speciality = req.body.speciality;
+  const created = today;
+  const role = "instructeur";
+  const status = "bloqué";
+  const etat = "en attente";
+  
+  try {
+   /* if (!req.body.email) {
+      return res.status(400).json({ msg: "Email is missing" });
+    }
+    
+    const user = await User.findOne({
+      where: {
+        email : req.body.email
+      },
+    });
+  
+    if (user) {
+      return res.status(404).json({ msg: "La demande existe déjà" });
+    }*/
+  
+    const ext = path.extname(file.name).toLowerCase();
+    const fileName = file.md5 + ext;
+    const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+    const allowedType = [".pdf"];
+  
+    if (!allowedType.includes(ext)) {
+      return res.status(422).json({ msg: "Invalid File Type" });
+    }
+  
+    file.mv(`./public/images/${fileName}`, async (err) => {
+      if (err) {
+        return res.status(500).json({ msg: err.message });
+      }
+  
+      try {
+        const newUser = {
+          name:name,
+          cv: fileName,
+          url: url,
+          email: email,
+          tel: tel,
+          message: message,
+          speciality: speciality,
+          role: role,
+          status: status,
+          etat: etat,
+          created: created,
+        };
+  
+        await User.create(newUser);
+  
+        res.status(201).json({ msg: "User created successfully" });
+      } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ msg: error.message });
+      }
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ msg: error.message });
+  }
 }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
-
-
-
-
-
-   
-
-
-
-
-
-
 
 
 

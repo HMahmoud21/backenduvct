@@ -33,6 +33,9 @@ module.exports = db.sequelize.define(
     image: {
         type: Sequelize.STRING,
     },
+    url: {
+        type: Sequelize.STRING,
+    },
      role: {
         type: Sequelize.INTEGER,
         defaultValue:"user",

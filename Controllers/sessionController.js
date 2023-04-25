@@ -7,10 +7,10 @@ addSession:async(req,res)=>{
             const {title,article,file,video,ref,sectionId}= req.body
             try {
                
-                const session = await Session.findOne({ where: { ref: ref } });
-                if (session) {
-                  return res.status(409).json({ msg: " existe déjà" }); 
-                }
+                //const session = await Session.findOne({ where: { tit} });
+                //if (session) {
+                  //return res.status(409).json({ msg: " existe déjà" }); 
+                //}
                 const newSession= await Session.create({
                     title: title,
                   
@@ -19,7 +19,7 @@ addSession:async(req,res)=>{
                     ref: ref,
                     video:video,
                  
-                    sectionId:sectionId
+                    sectionId:req.params.uuid
                   });
         
                 res.status(201).json({ msg: "session créé avec succès",session: newSession });
@@ -84,7 +84,8 @@ res.status(200).json({msg: "Session deleted successfuly"});
 } catch (error) {
     res.status(500).json({msg: error.message});
 }
-}
+},
+
 }
 
 

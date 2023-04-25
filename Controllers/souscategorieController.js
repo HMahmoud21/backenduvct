@@ -4,12 +4,12 @@ const SousCategorie=require("../models/SousCategorie");
 const souscategorieController={
 
 createsouscategorie:async(req,res)=>{
-    const {title,image,description,ref,categorieId,categorieUUid} = req.body
+    const {title,image,description,ref} = req.body
     try {
     const souscategorie = await SousCategorie.findOne({
         ref:ref
     })
-    if (souscategorie) {
+    if (!souscategorie) {
         return res.status(409).json({ msg: "souscatégorie  existe déjà" }); // Utilisation du code d'état 409 Conflict pour indiquer que la demande ne peut être traitée en raison d'un conflit avec les ressources existantes.
       }
       const newSousCategorie= await SousCategorie.create({ 
@@ -17,7 +17,7 @@ createsouscategorie:async(req,res)=>{
       image:image,
       description:description,
       ref: ref,
-     categorieId:categorieUUid
+     categorieId:req.params.id
      
     });
 

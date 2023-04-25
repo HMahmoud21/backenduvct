@@ -7,11 +7,11 @@ const CategorieController={
 CreateCategorie:async(req,res)=>{
     const today = new Date();
     
-    const { title, description,image,ref, formationId,formationUUid} = req.body; 
+    const { title, description,image,ref} = req.body; 
   
         try {
        
-          const categorie = await Categorie.findOne({ where: { ref: ref } });
+          const categorie = await Categorie.findOne({ where: { title:title } });
           if (categorie) {
             return res.status(409).json({ msg: " existe déjà" }); // Utilisation du code d'état 409 Conflict pour indiquer que la demande ne peut être traitée en raison d'un conflit avec les ressources existantes.
           }
@@ -23,13 +23,13 @@ CreateCategorie:async(req,res)=>{
             image: image,
             ref: ref,
             createdAt:today,
-            formationId:req.params.id
+        
           });
       
           res.status(201).json({ msg: "categorie créé avec succès", categorie: newCategorie });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ msg: "Une erreur est survenue lors de la création de l'evenement" });
+          res.status(500).json({ msg: "Une erreur est survenue lors de la création de coupon" });
         }
       },
 getCategories :async (req, res) =>{
@@ -52,10 +52,11 @@ getCategories :async (req, res) =>{
     
       },
 deleteCtegories:async(req, res) =>{
+  const uuid= req.params.uuid;
         try {
             const categorie = await Categorie.findOne({
                 where:{
-                    ref: req.body.ref
+                  uuid:uuid
                 }
             });
             if(!categorie) return res.status(404).json({msg: "catégorie n'existe pas "});

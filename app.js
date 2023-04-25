@@ -26,7 +26,8 @@ app.use(session({
 
 app.use(flash());
 app.use(FileUpload());
-app.use(express.static("public"));
+app.use(express.urlencoded({extended: true}))
+app.use('/images', express.static('public/images'))
 
 app.use(bodyParser.json())
 app.use(cors({
@@ -64,29 +65,28 @@ app.options("http://localhost:3000", cors())
 
 //requte f postman
 
-var router = require('./routes/UserRoute')
-//var formateurcandidat=require('./routes/Formateur')
-//var instructeur=require('./routes/instructeur')
-//var apprenant=require('./routes/Apprenant')
+
 var formation=require('./routes/FormationRoute');
 var evenement=require('./routes/Evenement')
-//var categorie=require('./routes/Categorie')
-var upload=require("./routes/uplod")
-//var souscategorie=require("./routes/souscategorie")
+var categorie=require('./routes/Categorie')
+var souscategorie =require("./routes/souscategorie");
 var section=require("./routes/section");
 var Session=require("./routes/sessionRoute")
+var user=require('./routes/UserRoute')
+var coupon=require('./routes/Coupon');
+var reclamation=require('./routes/reclamation')
+var message=require('./routes/message')
 
-app.use('/users', router);
-//app.use('/formateurcandidat',formateurcandidat);
-//app.use('/instructeur',instructeur);
-//app.use('/apprenant',apprenant);
+app.use('/users',user)
 app.use('/formation',formation);
 app.use('/event',evenement);
-//app.use('/cat',categorie);
-app.use('/upload',upload);
-//app.use("/souscategorie",souscategorie)
+app.use('/cat',categorie);
+app.use("/souscategorie",souscategorie)
 app.use("/section",section);
-app.use("/sessions",Session)
+app.use("/sessions",Session);
+app.use("/coupon",coupon);
+app.use("/reclamation",reclamation)
+app.use("/message",message)
 
 
 

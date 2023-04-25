@@ -7,6 +7,7 @@ router.get("/getall",sectionControlller.getSection)
 router.get("/getbyid/:uuid",sectionControlller.getsectionByid)
 router.patch("/update/:uuid",sectionControlller.updateSection)
 router.delete("/supprimer/:uuid",sectionControlller.deleteSection)
+router.get("/gettt/:uuid",sectionControlller.get55)
 
 
 

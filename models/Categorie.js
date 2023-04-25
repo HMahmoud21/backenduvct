@@ -46,9 +46,7 @@ const Categorie =db.sequelize.define('categories', {
     }
   });
   
-  Categorie.belongsTo(Formation, { foreignKey: 'formationId', unique: true });
-  Formation.hasOne(Categorie, { foreignKey: 'formationId' });
-  
+
   module.exports = Categorie;
 
 

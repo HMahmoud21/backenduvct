@@ -47,7 +47,11 @@ getFormations :async (req, res) =>{
               include:[{
                 model: User,
                 attributes:['name']
-            }]
+            }],
+            where:{
+              status: "pulier"
+
+            }
               
           });
       
@@ -58,7 +62,7 @@ getFormations :async (req, res) =>{
 },
 getFormationsByTitle :async (req, res) =>{
    
-    
+  const title = req.params.title;
       try {
         let response;
         
@@ -70,7 +74,31 @@ getFormationsByTitle :async (req, res) =>{
               }],
               where:
               {
-                title:req.body.title
+                title:title
+              }
+                
+            });
+        
+        res.status(200).json(response);
+    } catch (error) {
+        res.status(500).json({msg: error.message});
+    }
+}, 
+getFormationsById:async (req, res) =>{
+   
+  const uuid= req.params.uuid;
+      try {
+        let response;
+        
+            response = await Formation.findOne({
+                attributes:['title','offre','categorie','createdAt'],
+                include:[{
+                  model: User,
+                  attributes:['name']
+              }],
+              where:
+              {
+                   UUid:uuid
               }
                 
             });
@@ -168,6 +196,29 @@ archiver:async(req,res)=>{
         res.status(500).json({ msg: error.message });
       }
     },
+getFormationarchive:async(req,res)=>{
+  try {
+    let response;
+    
+        response = await Formation.findAll({
+            attributes:['title','offre','categorie','createdAt'],
+            include:[{
+              model: User,
+              attributes:['name']
+          }],
+          where:{ 
+            status:archiver
+
+          }
+            
+        });
+    
+    res.status(200).json(response);
+} catch (error) {
+    res.status(500).json({msg: error.message});
+}
+
+},
 deleteFormation:async(req, res) =>{
     try {
         const product = await Formation.findOne({

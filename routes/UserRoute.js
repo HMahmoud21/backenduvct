@@ -60,15 +60,15 @@ router.get("/activationpage/:activationCode",function(req, res) {
       })
      
   ;});
-router.get("/getuser", UserCtrl.getUser);
+router.get("/getuser/:uuid", UserCtrl.getUserBId);
 router.post("/devenirInstructeur",UserCtrl.devenirInstructeur)
 router.get("/getcandidatFormateur",UserCtrl.getCandidatFormateur)
 router.patch("/accepterFormateur",UserCtrl.AcceptFormateur)
 router.post("/ajouterinstructeur",UserCtrl.AjouterInstructeur)
 router.get("/getinstructeur",UserCtrl.getInstructeur)
 router.patch("/bloquer",UserCtrl.bloquerInstructeur)
-router.patch("debloquer",UserCtrl.debloquerInstructeur)
-router.delete("/supprimerFormateur",UserCtrl.deleteformateur)
+router.patch("/debloquer",UserCtrl.debloquerInstructeur)
+router.delete("/supprimerFormateur/:uuid",UserCtrl.deleteformateur)
 router.post("/ajouteradmin",UserCtrl.addAdmin)
 router.get("/getadmin",UserCtrl.getAdmin)
 router.patch("/bloquerAdmin",UserCtrl.BloquerAdmin)
@@ -81,8 +81,9 @@ router.post('/getmail',UserCtrl.forgetpass);
 router.patch("/update",UserCtrl.resetpass);
 router.get("/updateuser",UserCtrl.updateUser)
 router.patch("/modifierrole",UserCtrl.updateRole);
-
-
+router.patch("/logout/:uuid",UserCtrl.Logout);
+router.patch("/ajouterimage/:uuid",UserCtrl.updateimage);
+router.post("/ajouter",UserCtrl.ajouter202);
 
 
 

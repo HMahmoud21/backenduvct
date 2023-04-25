@@ -1,5 +1,6 @@
 const Section= require("../models/section")
 const Formation=require("../models/formation")
+const Session =require("../models/session")
 
 const SectionController={
 addsection:async(req,res)=>{ 
@@ -126,6 +127,27 @@ deleteSection:async(req,res)=>{
           res.status(500).json({msg: error.message});
       }
 },
+get55:async(req,res)=>{
+  const uuid = req.params.uuid;
+    console.log(uuid)
+    try {
+    const response = await Section.findOne({
+      attributes: ["title"],
+      where: { UUid: uuid},
+      include: [
+        {
+          model: Session,
+          attributes: ["title"]
+        }
+      ]
+    });
+
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).json({ msg: error.message });
+  }
+
+}
 }
 
 
