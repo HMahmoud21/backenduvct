@@ -75,7 +75,9 @@ var Session=require("./routes/sessionRoute")
 var user=require('./routes/UserRoute')
 var coupon=require('./routes/Coupon');
 var reclamation=require('./routes/reclamation')
-var message=require('./routes/message')
+var commentaire=require('./routes/Commentaire')
+
+var achat=require('./routes/achat')
 
 app.use('/users',user)
 app.use('/formation',formation);
@@ -86,8 +88,8 @@ app.use("/section",section);
 app.use("/sessions",Session);
 app.use("/coupon",coupon);
 app.use("/reclamation",reclamation)
-app.use("/message",message)
-
+app.use("/achat",achat)
+app.use('/commentaire',commentaire)
 
 
 

@@ -126,7 +126,7 @@ searchAllEventByDate: async (req, res) => {
   try {
     let response;
     
-        response = await Formation.findOne({
+        response = await Evenement.findOne({
             attributes:['title','offre','categorie','createdAt'],
             include:[{
               model: User,

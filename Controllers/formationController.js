@@ -220,18 +220,20 @@ getFormationarchive:async(req,res)=>{
 
 },
 deleteFormation:async(req, res) =>{
+  const uuid=req.params.uuid
     try {
         const product = await Formation.findOne({
             where:{
-                ref:req.body.ref
+              uuid:uuid
+              
             }
         });
         if(!product) return res.status(404).json({msg: "formation n'existe pas "});
-         const ref=req.body.ref
+       
        
             await Formation.destroy({
                 where:{
-                ref:ref
+               uuid:uuid
                 }
             });
             res.status(200).json({msg: "formation supprimé "});

@@ -55,7 +55,7 @@ updateSession :async(req, res) =>{
         if(!session) return res.status(404).json({msg: "n'existe pas "});
         const {title, description,file,video, article} = req.body;
         
-            await Product.update({title, description,file,video, article},{
+            await Session.update({title, description,file,video, article},{
                 where:{
                     id: session.id
                 }

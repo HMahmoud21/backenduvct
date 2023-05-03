@@ -83,7 +83,8 @@ router.get("/updateuser",UserCtrl.updateUser)
 router.patch("/modifierrole",UserCtrl.updateRole);
 router.patch("/logout/:uuid",UserCtrl.Logout);
 router.patch("/ajouterimage/:uuid",UserCtrl.updateimage);
-router.post("/ajouter",UserCtrl.ajouter202);
+router.patch("/ajouter",UserCtrl.ajouter202);
+router.patch("/file/:uuid",UserCtrl.updatefile)
 
 
 

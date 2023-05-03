@@ -11,7 +11,7 @@ router.get("/getFormationarchiver",FormationController.getFormationarchive);
 router.patch("/publier/:uuid",FormationController.publier);
 router.patch("/depulier/:uuid",FormationController.depublier);
 router.patch("/archiver/:uuid",FormationController.archiver)
-router.delete("supprmierformation",FormationController.deleteFormation);
+router.delete("/supprmierformation/:uuid",FormationController.deleteFormation);
 router.patch("/modification/:uuid",FormationController.updateFormation)
 
 

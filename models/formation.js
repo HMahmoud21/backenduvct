@@ -58,10 +58,7 @@ const Formation = db.sequelize.define(
     },
     price:{
         type: DataTypes.FLOAT,
-        allowNull: false,
-        validate:{
-            notEmpty: true
-        }
+    
     },
  
     ref:{

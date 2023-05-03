@@ -41,9 +41,7 @@ const Categorie =db.sequelize.define('categories', {
       type: Sequelize.STRING,
     },
 
-    formationId: {
-      type: Sequelize.INTEGER,
-    }
+   
   });
   
 

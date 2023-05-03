@@ -31,7 +31,7 @@ router.patch('/ajoutavatar/:uuid', upload.single('avatar'), function(req, res) {
 var upload = multer({ storage: storage })
   
 
-}
+})*/
 
 
 

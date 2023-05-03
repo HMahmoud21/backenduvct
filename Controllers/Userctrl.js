@@ -5,6 +5,7 @@ const User= require("../models/UserModel");
 const nodemailer = require('nodemailer');
 const path = require("path");
 const fs=require("fs");
+const multer = require('multer');
 
 const UserCtrl={
 register: async (req, res) => {
@@ -96,51 +97,51 @@ register: async (req, res) => {
             res.send("error: " + err);
           });
     },
+
 login: async (req, res) => {
-        const {  password } = req.body;
-       
-        try {
-          const user = await User.findOne({
-              where:{
-                  email: req.body.email,
-              },
-          });
-        
-          const match = await bcrypt.compareSync(password, user.password);
-          if(!match) return res.json({message: "mot de passe incorrect"});
-          if (user && user.isVerified === true) {
-            
-         
-          //const userId = user.dataValues.uuid;console.log(userId)
-          const name = user.name;console.log(name)
-          const email = user.email;console.log(email)
-          const accessToken = jwt.sign({ name, email,role }, process.env.ACCESS_TOKEN_SECRET,{
-              expiresIn: '20s'
-          });
-          
-          const refreshToken = jwt.sign({ name, email}, process.env.REFRESH_TOKEN_SECRET,{
-              expiresIn: '1d'
-          });console.log(refreshToken)
-          await User.update({refresh_token: refreshToken},{
-              where:{
-                email: email
-              }
-          });
-           
-          res.cookie('refreshToken', refreshToken,{
-              httpOnly: true,
-              maxAge: 24 * 60 * 60 * 1000
-          });
-          res.json({ message: "login avec success", accessToken: accessToken , refreshToken:refreshToken,user:user });
-        
-        } else {
-          res.json({ message: "verifiez votre compte" });
-          console.log("bbb");
-        }
-      } catch (error) {
-          res.json({message:"User does not exist"});
-      }
-    },
+  const {  password } = req.body;
+ 
+  try {
+    const user = await User.findOne({
+        where:{
+            email: req.body.email,
+        },
+    });
+  
+    const match = await bcrypt.compareSync(password, user.password);
+    if(!match) {return res.json({message: "mot de passe incorrect"});}console.log('name')
+    if(user && user.role==="instructeur" && user.accept==='en attente')
+     {return res.json({message: "compte non accepté"});}console.log("a")
+    if (user && user.isVerified === true) {
+      
+   
+    //const userId = user.dataValues.uuid;console.log(userId)
+    const name = user.name;console.log(name)
+    const email = user.email;console.log(email)
+    const uuid = user.UUid;console.log(uuid)
+    const accessToken = jwt.sign({uuid, name, email}, process.env.ACCESS_TOKEN_SECRET,{
+        expiresIn: '5h'
+    });
+    
+   /* const refreshToken = jwt.sign({ name, email}, process.env.REFRESH_TOKEN_SECRET,{
+        expiresIn: '1d'
+    });console.log(refreshToken)
+   
+     
+    res.cookie('refreshToken', refreshToken,{
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000
+    });*/
+    //res.json({ message: "login avec success", accessToken: accessToken ,user:user });
+    return res.json({user, accessToken,message: "login avec success"})
+  } else {
+    res.json({ message: "verifiez votre compte" });
+    console.log("bbb");
+  }
+} catch (error) {
+    res.json({message:"User does not exist"});
+}
+},
 getUserBId : async(req, res) =>{
         try {
            const uuid = req.params.uuid;
@@ -704,8 +705,7 @@ Logout :async(req, res) => {
 updateimage:async(req,res)=>{
   const uuid=req.params.uuid
  
-  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
-  const name = req.body.title;
+  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"}); 
   const file = req.files.file;
   const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
@@ -719,11 +719,11 @@ updateimage:async(req,res)=>{
       if(err) return res.status(500).json({msg: err.message});
       try {
             await User.update({
-              name: name, image: fileName, url: url
+              image: fileName, url: url
               
           },{
               where:{
-                UUid: uuid
+                uuid: uuid
               }
           });
         
@@ -741,14 +741,13 @@ const today = new Date();
   const file = req.files.file;
   const email= req.body.email;
   const tel= req.body.tel;
-
   const message=req.body.message;
   const speciality=req.body.speciality;
   const created= today;
   const role="instruceur";
   const status="bloqué";
   const etat="en attent";
-  const ext = path.extname(file.name).toLowerCase;
+  const ext = path.extname(file.name);
   const fileName = file.md5 + ext;
   const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
   const allowedType = ['.pdf'];
@@ -781,39 +780,14 @@ const today = new Date();
   })
 },
 ajouter202: async(req, res) => {
-  const today = new Date();
-  //const uuid=req.params.uuid
+  const uuid=req.params.uuid
 
   if (req.files === null) {
     return res.status(400).json({ msg: "No File Uploaded" });
   }
-  
-  const name = req.body.title
   const file = req.files.file;
-  const email = req.body.email;
-  const tel = req.body.tel;
-  const message = req.body.message;
-  const speciality = req.body.speciality;
-  const created = today;
-  const role = "instructeur";
-  const status = "bloqué";
-  const etat = "en attente";
-  
+
   try {
-   /* if (!req.body.email) {
-      return res.status(400).json({ msg: "Email is missing" });
-    }
-    
-    const user = await User.findOne({
-      where: {
-        email : req.body.email
-      },
-    });
-  
-    if (user) {
-      return res.status(404).json({ msg: "La demande existe déjà" });
-    }*/
-  
     const ext = path.extname(file.name).toLowerCase();
     const fileName = file.md5 + ext;
     const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
@@ -830,20 +804,21 @@ ajouter202: async(req, res) => {
   
       try {
         const newUser = {
-          name:name,
+         
           cv: fileName,
           url: url,
-          email: email,
-          tel: tel,
-          message: message,
-          speciality: speciality,
-          role: role,
-          status: status,
-          etat: etat,
-          created: created,
+          
         };
   
-        await User.create(newUser);
+        await User.update(
+        {
+         newUser
+          
+      },{
+          where:{
+            UUid: uuid
+          }
+      });
   
         res.status(201).json({ msg: "User created successfully" });
       } catch (error) {
@@ -855,7 +830,41 @@ ajouter202: async(req, res) => {
     console.log(error.message);
     res.status(500).json({ msg: error.message });
   }
-}
+},
+updatefile:async(req,res)=>{
+  const uuid=req.params.uuid
+ 
+  if(req.files === null) return res.status(400).json({msg: "No File Uploaded"});
+  const file = req.files.file;
+  const ext = path.extname(file.name).toLowerCase;
+  const fileName = file.md5 + ext;
+  const url = `${req.protocol}://${req.get("host")}/images/${fileName}`;
+  const allowedType = ['.pdf'];
+
+  if(!allowedType.includes(ext.toLowerCase())) return res.status(422).json({msg: "Invalid Images"});
+
+
+  file.mv(`./public/images/${fileName}`, async(err)=>{
+      if(err) return res.status(500).json({msg: err.message});
+      try {
+            await User.update({
+              name: name, cv: fileName, url: url
+              
+          },{
+              where:{
+                UUid: uuid
+              }
+          });
+        
+          res.status(201).json({msg: "image bien ajouté "});
+      } catch (error) {
+          console.log(error.message);
+      }
+  })
+},
+
+
+
 }
 
 
